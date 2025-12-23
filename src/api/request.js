@@ -29,20 +29,75 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   response => {
     const { data } = response
+    
+    // 如果返回的是 blob（文件下载）
+    if (response.config.responseType === 'blob') {
+      return response
+    }
+    
     // 假设后端返回的格式为 { code, message, data }
     if (data.code === 0 || response.status === 200) {
       return data
     } else {
-      ElMessage.error(data.message || '请求失败')
-      return Promise.reject(new Error(data.message || '请求失败'))
+      const errorMessage = data.message || '请求失败'
+      ElMessage.error({
+        message: errorMessage,
+        duration: 3000,
+        showClose: true
+      })
+      return Promise.reject(new Error(errorMessage))
     }
   },
   error => {
     let message = '网络错误，请重试'
+    let duration = 3000
+    
     if (error.response) {
-      message = `${error.response.status}: ${error.response.statusText}`
+      // 根据不同的状态码提供不同的提示
+      switch (error.response.status) {
+        case 400:
+          message = '请求参数错误'
+          break
+        case 401:
+          message = '未授权，请登录'
+          localStorage.removeItem('token')
+          break
+        case 403:
+          message = '禁止访问'
+          break
+        case 404:
+          message = '请求资源不存在'
+          break
+        case 500:
+          message = '服务器内部错误'
+          break
+        case 502:
+          message = '网关错误'
+          break
+        case 503:
+          message = '服务暂时不可用'
+          break
+        default:
+          message = `${error.response.status}: ${error.response.statusText}`
+      }
+      
+      // 获取后端返回的错误信息
+      if (error.response.data && error.response.data.message) {
+        message = error.response.data.message
+      }
+    } else if (error.message === 'Network Error') {
+      message = '网络连接失败，请检查网络'
+    } else if (error.code === 'ECONNABORTED') {
+      message = '请求超时，请稍后重试'
+      duration = 5000
     }
-    ElMessage.error(message)
+    
+    ElMessage.error({
+      message,
+      duration,
+      showClose: true
+    })
+    
     return Promise.reject(error)
   }
 )
