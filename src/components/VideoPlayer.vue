@@ -76,18 +76,6 @@
 
       <div class="spacer"></div>
 
-      <div class="volume-control">
-        <el-icon><Volume /></el-icon>
-        <el-slider
-          v-model="volume"
-          :min="0"
-          :max="1"
-          :step="0.1"
-          style="width: 100px"
-          @input="updateVolume"
-        />
-      </div>
-
       <span class="current-time">
         {{ formatCurrentTime() }} / {{ formatDuration() }}
       </span>
@@ -105,8 +93,7 @@ import {
   Clock,
   VideoPlay,
   VideoPause,
-  FullScreen,
-  Volume
+  FullScreen
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
