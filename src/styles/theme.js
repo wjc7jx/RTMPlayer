@@ -4,16 +4,18 @@
 
 // 颜色主题
 export const colors = {
-  primary: '#667eea',
+  primary: '#00a1d6', // 哔哩主蓝
+  pink: '#fb7299',    // 哔哩粉
   success: '#85ce61',
   warning: '#e6a23c',
   danger: '#f56c6c',
   error: '#f56c6c',
   info: '#409eff',
-  text: '#303133',
-  textSecondary: '#909399',
-  border: '#dcdfe6',
-  background: '#f5f7fa'
+  text: '#222',
+  textSecondary: '#888',
+  border: '#e3e5e7',
+  background: '#f4f5f7',
+  card: '#fff'
 }
 
 // 间距
@@ -27,10 +29,10 @@ export const spacing = {
 
 // 圆角
 export const borderRadius = {
-  sm: '4px',
-  md: '8px',
-  lg: '12px',
-  xl: '16px'
+  sm: '8px',
+  md: '12px',
+  lg: '18px',
+  xl: '24px'
 }
 
 // 阴影

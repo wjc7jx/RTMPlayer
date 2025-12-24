@@ -2,22 +2,47 @@
   <div class="home-container">
     <!-- 页面头部 -->
     <div class="home-header">
-      <h1>📺 视频中心</h1>
-      <p>发现精彩视频，享受高清观影体验</p>
+      <div class="header-content">
+        <h1>📺 发现精彩视频</h1>
+        <p>海量高清内容，尽在RTMPlayer</p>
+        <div class="header-stats">
+          <div class="stat-item">
+            <span class="stat-number">{{ totalVideos }}</span>
+            <span class="stat-label">精彩视频</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">HD</span>
+            <span class="stat-label">高清画质</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">24/7</span>
+            <span class="stat-label">全天播放</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 搜索栏 -->
-    <div class="search-bar">
-      <el-input
-        v-model="searchKeyword"
-        placeholder="搜索视频标题..."
-        clearable
-        @input="handleSearch"
-      >
-        <template #prefix>
-          <el-icon><Search /></el-icon>
-        </template>
-      </el-input>
+    <div class="search-section">
+      <div class="search-container">
+        <el-input
+          v-model="searchKeyword"
+          placeholder="搜索你感兴趣的视频内容..."
+          clearable
+          @input="handleSearch"
+          class="search-input"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        <div class="search-suggestions">
+          <el-tag size="small" effect="plain" @click="searchKeyword = '热门'">热门</el-tag>
+          <el-tag size="small" effect="plain" @click="searchKeyword = '教程'">教程</el-tag>
+          <el-tag size="small" effect="plain" @click="searchKeyword = '音乐'">音乐</el-tag>
+          <el-tag size="small" effect="plain" @click="searchKeyword = '电影'">电影</el-tag>
+        </div>
+      </div>
     </div>
 
     <!-- 主要内容区 -->
@@ -25,136 +50,143 @@
       <!-- 播放器区 -->
       <el-col :xs="24" :sm="24" :md="16" :lg="16">
         <div class="player-section">
-          <el-card class="player-card">
-            <template #header>
-              <div style="display: flex; justify-content: space-between; align-items: center">
-                <span>{{ currentVideo?.title || '选择视频观看' }}</span>
-                <el-tag v-if="currentVideo" type="success">正在播放</el-tag>
+          <div class="bili-card player-card">
+            <div class="card-header">
+              <div class="player-title">
+                <h3>{{ currentVideo?.title || '选择视频观看' }}</h3>
+                <div class="player-meta" v-if="currentVideo">
+                  <el-tag type="success" size="small">正在播放</el-tag>
+                  <span class="upload-info">{{ currentVideo.uploadedBy }}</span>
+                  <span class="view-count">
+                    <el-icon><VideoPlay /></el-icon>
+                    {{ currentVideo.views }} 次观看
+                  </span>
+                </div>
               </div>
-            </template>
+            </div>
 
-            <div v-if="currentVideo">
-              <VideoPlayer
-                :key="currentVideo.id"
-                :hlsUrl="currentVideo.hlsUrl"
-                :videoInfo="currentVideo"
-                :autoplay="true"
-                @play="onVideoPlay"
-                @pause="onVideoPause"
-                @ended="onVideoEnded"
-                @error="onVideoError"
-              />
+            <div class="card-body">
+              <div v-if="currentVideo" class="player-wrapper">
+                <VideoPlayer
+                  :key="currentVideo.id"
+                  :hlsUrl="currentVideo.hlsUrl"
+                  :videoInfo="currentVideo"
+                  :autoplay="true"
+                  @play="onVideoPlay"
+                  @pause="onVideoPause"
+                  @ended="onVideoEnded"
+                  @error="onVideoError"
+                />
+              </div>
+              <div v-else class="empty-player">
+                <Empty description="请从播放列表中选择视频观看" :showButton="false" />
+              </div>
             </div>
-            <div v-else class="empty-player">
-              <Empty description="请从左侧选择视频观看" :showButton="false" />
-            </div>
-          </el-card>
+          </div>
         </div>
       </el-col>
 
       <!-- 视频列表区 -->
       <el-col :xs="24" :sm="24" :md="8" :lg="8">
         <div class="playlist-section">
-          <el-card class="playlist-card">
-            <template #header>
-              <span>📝 播放列表 ({{ filteredVideos.length }})</span>
-            </template>
-
-            <!-- 加载状态 -->
-            <el-skeleton v-if="loading" :rows="5" animated />
-
-            <!-- 空状态 -->
-            <Empty
-              v-else-if="filteredVideos.length === 0"
-              description="暂无视频"
-              :showButton="false"
-              :imageSize="100"
-            />
-
-            <!-- 视频列表 -->
-            <div v-else class="video-list">
-              <div
-                v-for="video in filteredVideos"
-                :key="video.id"
-                class="video-item"
-                :class="{ active: currentVideo?.id === video.id }"
-                @click="selectVideo(video)"
-              >
-                <div class="video-item-cover">
-                  <img :src="video.cover" :alt="video.title" />
-                  <div class="duration">{{ video.duration }}</div>
-                </div>
-                <div class="video-item-info">
-                  <h4>{{ video.title }}</h4>
-                  <p class="meta">
-                    <span class="uploader">{{ video.uploadedBy }}</span>
-                  </p>
-                  <p class="views">
-                    <el-icon style="vertical-align: middle"><VideoPlay /></el-icon>
-                    {{ video.views }} 次观看
-                  </p>
-                </div>
+          <div class="bili-card playlist-card">
+            <div class="card-header">
+              <div class="playlist-header">
+                <h3>📝 播放列表</h3>
+                <span class="video-count">{{ filteredVideos.length }} 个视频</span>
               </div>
             </div>
 
-            <!-- 分页 -->
-            <div v-if="totalVideos > pageSize" class="pagination">
-              <el-pagination
-                v-model:current-page="currentPage"
-                :page-size="pageSize"
-                :total="totalVideos"
-                layout="prev, pager, next"
-                @current-change="loadVideos"
+            <div class="card-body">
+              <!-- 加载状态 -->
+              <el-skeleton v-if="loading" :rows="5" animated />
+
+              <!-- 空状态 -->
+              <Empty
+                v-else-if="filteredVideos.length === 0"
+                description="暂无视频"
+                :showButton="false"
+                :imageSize="100"
               />
+
+              <!-- 视频列表 -->
+              <div v-else class="video-list">
+                <div
+                  v-for="video in filteredVideos"
+                  :key="video.id"
+                  class="video-item"
+                  :class="{ active: currentVideo?.id === video.id }"
+                  @click="selectVideo(video)"
+                >
+                  <div class="video-item-cover">
+                    <img :src="video.cover" :alt="video.title" loading="lazy" />
+                    <div class="duration">{{ video.duration }}</div>
+                    <div class="play-overlay" v-if="currentVideo?.id === video.id">
+                      <el-icon><VideoPlay /></el-icon>
+                    </div>
+                  </div>
+                  <div class="video-item-info">
+                    <h4>{{ video.title }}</h4>
+                    <p class="meta">
+                      <span class="uploader">{{ video.uploadedBy }}</span>
+                      <span class="upload-time">{{ video.uploadTime || '1天前' }}</span>
+                    </p>
+                    <p class="views">
+                      <el-icon style="vertical-align: middle"><VideoPlay /></el-icon>
+                      {{ video.views }} 次观看
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 分页 -->
+              <div v-if="totalVideos > pageSize" class="pagination">
+                <el-pagination
+                  v-model:current-page="currentPage"
+                  :page-size="pageSize"
+                  :total="totalVideos"
+                  layout="prev, pager, next"
+                  @current-change="loadVideos"
+                  small
+                />
+              </div>
             </div>
-          </el-card>
+          </div>
         </div>
       </el-col>
     </el-row>
 
     <!-- 相关推荐 -->
     <div v-if="recommendedVideos.length > 0" class="recommended-section">
-      <h2>🎯 推荐视频</h2>
-      <el-row :gutter="20">
-        <el-col
-          v-for="video in recommendedVideos.slice(0, 3)"
+      <div class="section-header">
+        <h2>🎯 为你推荐</h2>
+        <span class="section-desc">根据你的观看记录为你推荐更多精彩内容</span>
+      </div>
+      <div class="video-grid">
+        <div
+          v-for="video in recommendedVideos.slice(0, 6)"
           :key="video.id"
-          :xs="24"
-          :sm="12"
-          :md="8"
-          :lg="8"
+          class="bili-card video-card"
+          @click="selectVideo(video)"
         >
-          <el-card class="video-card" shadow="hover" @click="selectVideo(video)">
-            <template #header>
-              <div class="video-card-header">
-                <img :src="video.cover" :alt="video.title" class="video-card-cover" />
-                <div class="duration-badge">{{ video.duration }}</div>
-              </div>
-            </template>
-
-            <div class="video-card-body">
-              <h3>{{ video.title }}</h3>
-              <p class="video-card-meta">
-                <span>{{ video.uploadedBy }}</span>
-              </p>
-              <p class="video-card-desc">{{ video.description }}</p>
-              <div class="video-card-stats">
-                <span class="views">
-                  <el-icon><VideoPlay /></el-icon>
-                  {{ video.views }}
-                </span>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click.stop="selectVideo(video)"
-                >
-                  播放
-                </el-button>
-              </div>
+          <div class="video-card-cover">
+            <img :src="video.cover" :alt="video.title" loading="lazy" />
+            <div class="duration-badge">{{ video.duration }}</div>
+            <div class="play-button">
+              <el-icon><VideoPlay /></el-icon>
             </div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </div>
+
+          <div class="video-card-body">
+            <h3 class="video-title">{{ video.title }}</h3>
+            <div class="video-meta">
+              <span class="uploader">{{ video.uploadedBy }}</span>
+              <span class="view-count">{{ video.views }} 观看</span>
+            </div>
+            <p class="video-desc">{{ video.description }}</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -304,39 +336,150 @@ watch(searchKeyword, () => {
 
 <style scoped>
 .home-container {
-  padding: 20px;
+  padding: 24px;
+  background: var(--bili-bg);
+  min-height: calc(100vh - 64px);
 }
 
 .home-header {
+  background: var(--bili-card);
+  border-radius: var(--bili-radius);
+  box-shadow: var(--bili-shadow);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.header-content {
   text-align: center;
-  margin-bottom: 30px;
+  padding: 48px 24px;
+  background: linear-gradient(135deg, var(--bili-primary), var(--bili-pink));
+  color: white;
 }
 
-.home-header h1 {
-  font-size: 28px;
-  margin-bottom: 10px;
-  color: #333;
+.header-content h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
-.home-header p {
+.header-content p {
   font-size: 16px;
-  color: #666;
+  opacity: 0.9;
+  margin-bottom: 32px;
 }
 
-.search-bar {
-  margin-bottom: 20px;
+.header-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
 }
 
-.search-bar :deep(.el-input) {
-  max-width: 400px;
+.stat-item {
+  text-align: center;
 }
 
-.player-section {
-  margin-bottom: 20px;
+.stat-number {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.player-card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.search-section {
+  margin-bottom: 32px;
+}
+
+.search-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-input :deep(.el-input__wrapper) {
+  border-radius: var(--bili-radius);
+  box-shadow: var(--bili-shadow);
+  border: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.search-input :deep(.el-input__wrapper:hover) {
+  border-color: var(--bili-primary);
+}
+
+.search-input :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--bili-primary);
+  box-shadow: 0 0 0 3px rgba(0,161,214,0.1);
+}
+
+.search-suggestions {
+  margin-top: 16px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-suggestions .el-tag {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search-suggestions .el-tag:hover {
+  background: var(--bili-primary);
+  color: white;
+}
+
+.bili-card {
+  background: var(--bili-card);
+  border-radius: var(--bili-radius);
+  box-shadow: var(--bili-shadow);
+  border: 1px solid var(--bili-border);
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.bili-card:hover {
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--bili-border);
+}
+
+.card-body {
+  padding: 20px 24px;
+}
+
+.player-title h3 {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--bili-text);
+}
+
+.player-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.upload-info, .view-count {
+  font-size: 14px;
+  color: var(--bili-text-secondary);
+}
+
+.player-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
 }
 
 .empty-player {
@@ -344,19 +487,43 @@ watch(searchKeyword, () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--bili-bg);
+  border-radius: 12px;
 }
 
-.playlist-section {
-  margin-bottom: 20px;
+.playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.playlist-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--bili-text);
+}
+
+.video-count {
+  font-size: 14px;
+  color: var(--bili-text-secondary);
+  padding: 4px 12px;
+  background: var(--bili-bg);
+  border-radius: 12px;
 }
 
 .playlist-card {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-height: 600px;
-  overflow-y: auto;
+  max-height: 680px;
+}
+
+.playlist-card .card-body {
+  padding: 0;
 }
 
 .video-list {
+  max-height: 560px;
+  overflow-y: auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -364,30 +531,34 @@ watch(searchKeyword, () => {
 
 .video-item {
   display: flex;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: #f9f9f9;
+  transition: all 0.2s;
+  background: var(--bili-bg);
+  border: 2px solid transparent;
 }
 
 .video-item:hover {
-  background: #f0f0f0;
+  background: white;
+  border-color: var(--bili-primary);
   transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0,161,214,0.1);
 }
 
 .video-item.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--bili-primary), var(--bili-pink));
   color: white;
+  border-color: transparent;
 }
 
 .video-item-cover {
   position: relative;
-  width: 80px;
-  height: 60px;
+  width: 96px;
+  height: 72px;
   flex-shrink: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   background: #000;
 }
@@ -405,8 +576,23 @@ watch(searchKeyword, () => {
   background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
 }
 
 .video-item-info {
@@ -415,19 +601,23 @@ watch(searchKeyword, () => {
 }
 
 .video-item-info h4 {
-  margin: 0;
+  margin: 0 0 8px 0;
   font-size: 14px;
   font-weight: 600;
-  white-space: nowrap;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 6px;
 }
 
 .meta {
-  margin: 4px 0;
+  margin: 8px 0;
   font-size: 12px;
-  color: #999;
+  color: var(--bili-text-secondary);
+  display: flex;
+  gap: 12px;
 }
 
 .video-item.active .meta {
@@ -435,11 +625,12 @@ watch(searchKeyword, () => {
 }
 
 .views {
-  margin: 4px 0;
+  margin: 8px 0 0 0;
   font-size: 12px;
   display: flex;
   align-items: center;
   gap: 4px;
+  color: var(--bili-text-secondary);
 }
 
 .video-item.active .views {
@@ -447,22 +638,36 @@ watch(searchKeyword, () => {
 }
 
 .pagination {
-  margin-top: 16px;
+  padding: 16px;
   text-align: center;
-}
-
-.pagination :deep(.el-pagination) {
-  justify-content: center;
+  border-top: 1px solid var(--bili-border);
 }
 
 .recommended-section {
-  margin-top: 40px;
+  margin-top: 48px;
 }
 
-.recommended-section h2 {
-  font-size: 22px;
-  margin-bottom: 20px;
-  color: #333;
+.section-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.section-header h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: var(--bili-text);
+  font-weight: 700;
+}
+
+.section-desc {
+  font-size: 16px;
+  color: var(--bili-text-secondary);
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .video-card {
@@ -471,28 +676,31 @@ watch(searchKeyword, () => {
 }
 
 .video-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.video-card-header {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 */
-  height: 0;
-  overflow: hidden;
-  background: #000;
-  border-radius: 4px;
-  margin: -16px -16px 0 -16px;
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.15);
 }
 
 .video-card-cover {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-card-cover img {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.video-card:hover .video-card-cover img {
+  transform: scale(1.05);
 }
 
 .duration-badge {
@@ -502,83 +710,113 @@ watch(searchKeyword, () => {
   background: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
+}
+
+.play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  background: var(--bili-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  opacity: 0;
+  transition: all 0.3s;
+  box-shadow: 0 4px 16px rgba(0,161,214,0.3);
+}
+
+.video-card:hover .play-button {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .video-card-body {
-  padding: 16px 0;
+  padding: 20px;
 }
 
-.video-card-body h3 {
-  margin: 0 0 8px 0;
+.video-title {
+  margin: 0 0 12px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  line-height: 1.4;
+  color: var(--bili-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.video-card-meta {
-  margin: 8px 0;
-  font-size: 12px;
-  color: #999;
-}
-
-.video-card-desc {
-  margin: 8px 0;
-  font-size: 13px;
-  color: #666;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.video-card-stats {
+.video-meta {
+  margin-bottom: 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #f0f0f0;
+  font-size: 12px;
+  color: var(--bili-text-secondary);
 }
 
-.views {
-  font-size: 12px;
-  color: #999;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.uploader {
+  font-weight: 500;
+}
+
+.video-desc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--bili-text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .home-container {
-    padding: 15px;
+    padding: 20px;
   }
-
-  .home-header h1 {
-    font-size: 24px;
+  
+  .header-stats {
+    gap: 32px;
   }
-
-  .search-bar :deep(.el-input) {
-    max-width: 100%;
+  
+  .video-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .home-container {
-    padding: 10px;
+    padding: 16px;
   }
 
-  .home-header h1 {
+  .header-content {
+    padding: 32px 20px;
+  }
+  
+  .header-content h1 {
+    font-size: 24px;
+  }
+  
+  .header-stats {
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .stat-number {
     font-size: 20px;
-  }
-
-  .home-header p {
-    font-size: 14px;
   }
 
   .playlist-card {
@@ -586,12 +824,18 @@ watch(searchKeyword, () => {
   }
 
   .video-item-cover {
-    width: 70px;
-    height: 50px;
+    width: 80px;
+    height: 60px;
+  }
+  
+  .video-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .video-item-info h4 {
-    font-size: 13px;
+  .card-header,
+  .card-body {
+    padding: 16px;
   }
 }
 </style>

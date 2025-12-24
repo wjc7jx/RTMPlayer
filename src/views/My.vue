@@ -2,30 +2,65 @@
   <div class="my-container">
     <!-- 页面头部 -->
     <div class="my-header">
-      <h1>👤 我的视频</h1>
-      <p>管理您上传和收藏的视频</p>
+      <div class="header-content">
+        <h1>👤 个人中心</h1>
+        <p>管理您的视频作品和观看记录</p>
+        <div class="user-stats">
+          <div class="stat-item">
+            <span class="stat-number">{{ totalVideos }}</span>
+            <span class="stat-label">我的作品</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">{{ getTotalViews() }}</span>
+            <span class="stat-label">总播放量</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">{{ getTotalSize() }}</span>
+            <span class="stat-label">存储空间</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 工具栏 -->
-    <div class="toolbar">
+    <div class="toolbar bili-card">
       <div class="toolbar-left">
-        <el-button type="primary" @click="handleRefresh">
+        <button class="action-btn ripple-effect" @click="handleRefresh">
           <el-icon><Refresh /></el-icon>
-          刷新
-        </el-button>
-        <el-button 
+          刷新列表
+        </button>
+        <button 
           v-if="selectedVideos.length > 0" 
-          type="danger" 
+          class="action-btn danger ripple-effect" 
           @click="handleBatchDelete"
         >
           <el-icon><Delete /></el-icon>
           删除选中 ({{ selectedVideos.length }})
-        </el-button>
+        </button>
       </div>
       <div class="toolbar-right">
-        <span class="total-info">
-          共 {{ totalVideos }} 个视频，总大小 {{ getTotalSize() }}
-        </span>
+        <div class="view-toggle">
+          <button 
+            class="toggle-btn" 
+            :class="{ active: viewMode === 'table' }"
+            @click="viewMode = 'table'"
+          >
+            <svg viewBox="0 0 1024 1024" width="16" height="16" fill="currentColor">
+              <path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 208H136v-112h752v112zm0 224H136v-112h752v112zm0 224H136v-112h752v112z"/>
+            </svg>
+            列表
+          </button>
+          <button 
+            class="toggle-btn" 
+            :class="{ active: viewMode === 'grid' }"
+            @click="viewMode = 'grid'"
+          >
+            <svg viewBox="0 0 1024 1024" width="16" height="16" fill="currentColor">
+              <path d="M928 160H96c-17.7 0-32 14.3-32 32v640c0 17.7 14.3 32 32 32h832c17.7 0 32-14.3 32-32V192c0-17.7-14.3-32-32-32zm-40 208H136v-112h752v112zm0 224H136v-112h752v112zm0 224H136v-112h752v112z"/>
+            </svg>
+            卡片
+          </button>
+        </div>
       </div>
     </div>
 
@@ -323,6 +358,15 @@ const getTotalSize = () => {
   return `${totalMB} MB`
 }
 
+/**
+ * 获取总播放量
+ */
+const getTotalViews = () => {
+  return videos.value.reduce((sum, video) => sum + (video.views || 0), 0)
+}
+
+const viewMode = ref('table')
+
 onMounted(() => {
   loadVideos(1)
 })
@@ -330,33 +374,66 @@ onMounted(() => {
 
 <style scoped>
 .my-container {
-  padding: 20px;
+  padding: 24px;
+  background: var(--bili-bg);
+  min-height: calc(100vh - 64px);
 }
 
 .my-header {
+  background: var(--bili-card);
+  border-radius: var(--bili-radius);
+  box-shadow: var(--bili-shadow);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.header-content {
   text-align: center;
-  margin-bottom: 30px;
+  padding: 48px 24px;
+  background: linear-gradient(135deg, var(--bili-primary), var(--bili-pink));
+  color: white;
 }
 
-.my-header h1 {
-  font-size: 28px;
-  margin-bottom: 10px;
-  color: #333;
+.header-content h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
-.my-header p {
+.header-content p {
   font-size: 16px;
-  color: #666;
+  opacity: 0.9;
+  margin-bottom: 32px;
+}
+
+.user-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 14px;
+  opacity: 0.8;
 }
 
 .toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 15px;
-  background: #f5f7fa;
-  border-radius: 8px;
+  margin-bottom: 24px;
+  padding: 20px 24px;
 }
 
 .toolbar-left {
@@ -364,28 +441,70 @@ onMounted(() => {
   gap: 12px;
 }
 
-.toolbar-right {
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 2px solid var(--bili-primary);
+  background: var(--bili-primary);
+  color: white;
+  border-radius: var(--bili-radius);
   font-size: 14px;
-  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.total-info {
+.action-btn:hover {
+  background: var(--bili-pink);
+  border-color: var(--bili-pink);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,161,214,0.2);
+}
+
+.action-btn.danger {
+  border-color: var(--bili-pink);
+  background: var(--bili-pink);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bili-bg);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 16px;
-  background: white;
-  border-radius: 4px;
-  border: 1px solid #dcdfe6;
+  border: none;
+  background: transparent;
+  color: var(--bili-text-secondary);
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn.active {
+  background: var(--bili-primary);
+  color: white;
 }
 
 .video-table-wrapper {
-  background: white;
-  border-radius: 8px;
+  border-radius: var(--bili-radius);
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--bili-shadow);
+  border: 1px solid var(--bili-border);
 }
 
 .video-info-cell {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: flex-start;
 }
 
@@ -393,7 +512,7 @@ onMounted(() => {
   width: 120px;
   height: 70px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
@@ -403,68 +522,90 @@ onMounted(() => {
 }
 
 .video-details h4 {
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   font-size: 14px;
   font-weight: 600;
-  white-space: nowrap;
+  color: var(--bili-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .duration {
   margin: 4px 0;
   font-size: 12px;
-  color: #909399;
+  color: var(--bili-text-secondary);
 }
 
 .description {
   margin: 4px 0;
   font-size: 12px;
-  color: #606266;
+  color: var(--bili-text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .pagination {
   display: flex;
   justify-content: flex-end;
   padding: 20px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--bili-border);
+  background: var(--bili-card);
 }
 
 .play-dialog-content {
   min-height: 400px;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
   .my-container {
-    padding: 15px;
+    padding: 20px;
+  }
+  
+  .user-stats {
+    gap: 32px;
   }
 
   .toolbar {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: stretch;
   }
 
   .toolbar-left {
     justify-content: flex-start;
   }
-
-  .toolbar-right {
-    text-align: right;
-  }
 }
 
 @media (max-width: 768px) {
   .my-container {
-    padding: 10px;
+    padding: 16px;
   }
 
-  .my-header h1 {
-    font-size: 22px;
+  .header-content {
+    padding: 32px 20px;
+  }
+  
+  .header-content h1 {
+    font-size: 24px;
+  }
+  
+  .user-stats {
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .stat-number {
+    font-size: 20px;
   }
 
   .video-cover {
@@ -476,31 +617,24 @@ onMounted(() => {
     font-size: 13px;
   }
 
-  :deep(.el-table) {
-    font-size: 12px;
-  }
-
-  :deep(.el-button) {
-    padding: 4px 8px;
-    font-size: 12px;
+  .action-btn {
+    padding: 10px 16px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
   .toolbar {
-    padding: 10px;
+    padding: 16px;
   }
 
   .toolbar-left {
     width: 100%;
+    flex-direction: column;
   }
-
-  :deep(.el-table__header th) {
-    padding: 8px 0;
-  }
-
-  :deep(.el-table__body td) {
-    padding: 8px 0;
+  
+  .user-stats {
+    justify-content: center;
   }
 }
 </style>

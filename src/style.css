@@ -1,12 +1,20 @@
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
+  /* 哔哩哔哩主色调 */
+  --bili-primary: #00a1d6;
+  --bili-pink: #fb7299;
+  --bili-bg: #f4f5f7;
+  --bili-card: #fff;
+  --bili-text: #222;
+  --bili-text-secondary: #888;
+  --bili-border: #e3e5e7;
+  --bili-radius: 18px;
+  --bili-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  --bili-font: 'HarmonyOS Sans', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--bili-font);
   color-scheme: light;
-  color: #333;
-  background-color: #fff;
-
+  color: var(--bili-text);
+  background-color: var(--bili-bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -19,109 +27,218 @@
   box-sizing: border-box;
 }
 
-html,
-body,
-#app {
+html, body, #app {
   width: 100%;
   height: 100%;
+  background: var(--bili-bg);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--bili-primary);
   text-decoration: none;
+  transition: color 0.2s;
 }
-
 a:hover {
-  color: #535bf2;
+  color: var(--bili-pink);
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background-color: #fff;
+  background-color: var(--bili-bg);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--bili-font);
+  font-weight: 700;
+  color: var(--bili-text);
+}
+
+.bili-card, .card {
+  background: var(--bili-card);
+  border-radius: var(--bili-radius);
+  box-shadow: var(--bili-shadow);
+  border: 1px solid var(--bili-border);
+  padding: 1.5em 1.5em 1.2em 1.5em;
+  margin-bottom: 1.5em;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.bili-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bili-primary), var(--bili-pink));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.bili-card:hover {
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+}
+
+.bili-card:hover::before {
+  transform: scaleX(1);
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
+  border-radius: var(--bili-radius);
+  border: 1.5px solid var(--bili-primary);
+  padding: 0.5em 1.4em;
   font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  font-weight: 600;
+  font-family: var(--bili-font);
+  background-color: var(--bili-primary);
+  color: #fff;
   cursor: pointer;
-  transition: border-color 0.25s;
+  box-shadow: 0 2px 8px rgba(0,161,214,0.08);
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
 }
 
 button:hover {
-  border-color: #646cff;
+  background: var(--bili-pink);
+  border-color: var(--bili-pink);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(251,114,153,0.20);
+  transform: translateY(-2px);
+}
+
+button:hover::before {
+  left: 100%;
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(251,114,153,0.15);
 }
 
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 3px auto var(--bili-pink);
+  outline-offset: 2px;
 }
 
-.card {
-  padding: 2em;
+/* 全局动画和交互效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.pulse-animation {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 加载动画 */
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--bili-bg) 25%, var(--bili-border) 50%, var(--bili-bg) 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 悬浮效果增强 */
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+}
+
+/* 点击涟漪效果 */
+.ripple-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-effect::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transform: translate(-50%, -50%);
+  transition: all 0.3s;
+}
+
+.ripple-effect:active::before {
+  width: 200%;
+  height: 200%;
 }
 
 #app {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.card {
-  padding: 2em;
-}
-
-#app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 0 5.5rem 0; /* 底部预留空间给底部导航 */
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--bili-text);
+    background-color: var(--bili-bg);
   }
   a:hover {
-    color: #747bff;
+    color: var(--bili-pink);
   }
   button {
-    background-color: #f9f9f9;
+    background-color: var(--bili-primary);
+    color: #fff;
   }
 }
