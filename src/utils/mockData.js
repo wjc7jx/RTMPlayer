@@ -7,18 +7,18 @@ export const mockVideos = [
   {
     id: 1,
     title: '示例视频 1',
-    cover: 'https://via.placeholder.com/400x225?text=Video+1',
-    hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x3devon.m3u8',
+    cover: 'https://picsum.photos/400/225',
+    hlsUrl: 'https://live.funhillrm.com/5/sd/live.m3u8',
     uploadedBy: 'User A',
     uploadTime: '2025-12-23T10:00:00',
     duration: '10:23',
     views: 1230,
-    description: '这是一个示例视频，展示HLS播放器的功能'
+    description: '虽然是黑屏，但是传输格式是HLS（https://live.funhillrm.com/5/sd/live.m3u8）'
   },
   {
     id: 2,
     title: '示例视频 2',
-    cover: 'https://via.placeholder.com/400x225?text=Video+2',
+    cover: 'https://picsum.photos/400/225',
     hlsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     uploadedBy: 'User B',
     uploadTime: '2025-12-22T15:30:00',
@@ -29,7 +29,7 @@ export const mockVideos = [
   {
     id: 3,
     title: '示例视频 3',
-    cover: 'https://via.placeholder.com/400x225?text=Video+3',
+    cover: 'https://picsum.photos/400/225',
     hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x3devon.m3u8',
     uploadedBy: 'User C',
     uploadTime: '2025-12-21T08:15:00',
@@ -40,7 +40,7 @@ export const mockVideos = [
   {
     id: 4,
     title: '示例视频 4',
-    cover: 'https://via.placeholder.com/400x225?text=Video+4',
+    cover: 'https://picsum.photos/400/225',
     hlsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
     uploadedBy: 'User D',
     uploadTime: '2025-12-20T12:00:00',
@@ -51,24 +51,13 @@ export const mockVideos = [
   {
     id: 5,
     title: '示例视频 5',
-    cover: 'https://via.placeholder.com/400x225?text=Video+5',
+    cover: 'https://picsum.photos/400/225',
     hlsUrl: 'https://test-streams.mux.dev/x36xhzz/x3devon.m3u8',
     uploadedBy: 'User E',
     uploadTime: '2025-12-19T14:45:00',
     duration: '12:15',
     views: 1876,
     description: '长时间HLS视频演示'
-  },
-  {
-    id: 6,
-    title: '示例视频 6',
-    cover: 'https://via.placeholder.com/400x225?text=Video+6',
-    hlsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    uploadedBy: 'User F',
-    uploadTime: '2025-12-18T09:30:00',
-    duration: '8:20',
-    views: 923,
-    description: '演示视频列表的滚动加载'
   }
 ]
 
