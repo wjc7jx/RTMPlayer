@@ -7,68 +7,50 @@ export const mockVideos = [
   {
     id: 1,
     title: '示例视频 1',
-    cover: 'https://picsum.photos/400/225',
-    hlsUrl: '/hls/vod/test1.mp4.m3u8',
-    uploadedBy: 'User A',
-    uploadTime: '2025-12-23T10:00:00',
-    duration: '10:23',
-    views: 1230,
-    description: '示例视频，用于测试HLS播放功能'
+    videoUrl: '/wwwroot/javaProject/video/test1.mp4',
+    createTime: '2025-12-23T10:00:00.000+00:00',
+    updateTime: '2025-12-23T10:00:00.000+00:00',
+    isDeleted: 0
   },
   {
     id: 2,
     title: '示例视频 2',
-    cover: 'https://picsum.photos/400/225',
-    hlsUrl: '/hls/vod/test2.mp4.m3u8',
-    uploadedBy: 'User B',
-    uploadTime: '2025-12-22T15:30:00',
-    duration: '9:48',
-    views: 856,
-    description: '示例视频，用于测试HLS播放功能'
+    videoUrl: '/wwwroot/javaProject/video/test2.mp4',
+    createTime: '2025-12-22T15:30:00.000+00:00',
+    updateTime: '2025-12-22T15:30:00.000+00:00',
+    isDeleted: 0
   },
   {
     id: 3,
     title: '示例视频 3',
-    cover: 'https://picsum.photos/400/225',
-    hlsUrl: '/hls/vod/test3.mp4.m3u8',
-    uploadedBy: 'User C',
-    uploadTime: '2025-12-21T08:15:00',
-    duration: '15:42',
-    views: 2145,
-    description: '示例视频，用于测试HLS播放功能'
+    videoUrl: '/wwwroot/javaProject/video/test3.mp4',
+    createTime: '2025-12-21T08:15:00.000+00:00',
+    updateTime: '2025-12-21T08:15:00.000+00:00',
+    isDeleted: 0
   },
   {
     id: 4,
     title: '示例视频 4',
-    cover: 'https://picsum.photos/400/225',
-    hlsUrl: '/hls/vod/test4.mp4.m3u8',
-    uploadedBy: 'User D',
-    uploadTime: '2025-12-20T12:00:00',
-    duration: '7:30',
-    views: 654,
-    description: '示例视频，用于测试HLS播放功能'
+    videoUrl: '/wwwroot/javaProject/video/test4.mp4',
+    createTime: '2025-12-20T12:00:00.000+00:00',
+    updateTime: '2025-12-20T12:00:00.000+00:00',
+    isDeleted: 0
   },
   {
     id: 5,
     title: '示例视频 5',
-    cover: 'https://picsum.photos/400/225',
-    hlsUrl: '/hls/vod/test5.mp4.m3u8',
-    uploadedBy: 'User E',
-    uploadTime: '2025-12-19T14:45:00',
-    duration: '12:15',
-    views: 1876,
-    description: '示例视频，用于测试HLS播放功能'
+    videoUrl: '/wwwroot/javaProject/video/test5.mp4',
+    createTime: '2025-12-19T14:45:00.000+00:00',
+    updateTime: '2025-12-19T14:45:00.000+00:00',
+    isDeleted: 0
   },
-    {
+  {
     id: 6,
     title: '示例视频 6',
-    cover: 'https://picsum.photos/400/225',
-    hlsUrl: 'https://www.w3schools.com/html/mov_bbb.mp4',
-    uploadedBy: 'User F',
-    uploadTime: '2025-12-19T14:45:00',
-    duration: '12:15',
-    views: 1876,
-    description: '示例视频，用于测试MP4播放功能'
+    videoUrl: '/wwwroot/javaProject/video/test6.mp4',
+    createTime: '2025-12-18T14:45:00.000+00:00',
+    updateTime: '2025-12-18T14:45:00.000+00:00',
+    isDeleted: 0
   }
 ]
 
@@ -81,10 +63,9 @@ export const fetchMockVideos = (page = 1, pageSize = 6) => {
       const start = (page - 1) * pageSize
       const end = start + pageSize
       resolve({
-        data: mockVideos.slice(start, end),
-        total: mockVideos.length,
-        page,
-        pageSize
+        code: 200,
+        msg: '操作成功',
+        data: mockVideos.slice(start, end)
       })
     }, 500) // 模拟网络延迟
   })

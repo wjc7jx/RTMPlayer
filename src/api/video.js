@@ -1,8 +1,8 @@
 import request from './request'
 
-// 获取视频列表
+// 查询所有未删除的视频信息列表
 export const getVideos = (params) => {
-  return request.get('/videos', { params })
+  return request.post('/api/videoInfo/listAll', params)
 }
 
 // 获取单个视频详情

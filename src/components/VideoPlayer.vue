@@ -34,18 +34,15 @@
       <div class="info-header">
         <h2 class="video-title">{{ videoInfo.title || '无标题' }}</h2>
         <div class="video-meta">
-          <span class="upload-by">
-            <el-icon><User /></el-icon>
-            {{ videoInfo.uploadedBy || '未知上传者' }}
-          </span>
-          <span class="upload-time">
+          <span v-if="videoInfo.createTime" class="upload-time">
             <el-icon><Clock /></el-icon>
-            {{ formatTime(videoInfo.uploadTime) }}
+            {{ formatTime(videoInfo.createTime) }}
+          </span>
+          <span v-if="videoInfo.updateTime !== videoInfo.createTime" class="update-time">
+            <el-icon><Clock /></el-icon>
+            更新于 {{ formatTime(videoInfo.updateTime) }}
           </span>
         </div>
-      </div>
-      <div v-if="videoInfo.description" class="video-description">
-        <p>{{ videoInfo.description }}</p>
       </div>
     </div>
 
@@ -100,7 +97,12 @@ const props = defineProps({
   // HLS播放地址或普通视频地址
   hlsUrl: {
     type: String,
-    required: true
+    required: false
+  },
+  // 视频URL（新格式）
+  videoUrl: {
+    type: String,
+    required: false
   },
   // 视频信息
   videoInfo: {
@@ -126,24 +128,28 @@ const currentTime = ref(0)
 const duration = ref(0)
 
 const currentSource = computed(() => {
+  // 优先使用videoUrl（新格式）
+  const sourceUrl = props.videoUrl || props.hlsUrl
+  
   // 如果是HLS地址且浏览器支持，使用HLS.js
-  if (props.hlsUrl && props.hlsUrl.endsWith('.m3u8')) {
+  if (sourceUrl && sourceUrl.endsWith('.m3u8')) {
     return null // HLS会由hls.js处理
   }
-  return props.hlsUrl
+  return sourceUrl
 })
 
 /**
  * 初始化播放器
  */
 const initPlayer = () => {
-  if (!videoElement.value || !props.hlsUrl) return
+  const sourceUrl = props.videoUrl || props.hlsUrl
+  if (!videoElement.value || !sourceUrl) return
 
   loading.value = true
   error.value = ''
 
   // 处理HLS流
-  if (props.hlsUrl.endsWith('.m3u8')) {
+  if (sourceUrl.endsWith('.m3u8')) {
     if (HLS.isSupported()) {
       if (hls.value) {
         hls.value.destroy()
@@ -155,7 +161,7 @@ const initPlayer = () => {
         lowLatencyMode: false
       })
 
-      hls.value.loadSource(props.hlsUrl)
+      hls.value.loadSource(sourceUrl)
       hls.value.attachMedia(videoElement.value)
 
       hls.value.on(HLS.Events.MANIFEST_PARSED, () => {
@@ -170,7 +176,7 @@ const initPlayer = () => {
       })
     } else if (videoElement.value.canPlayType('application/vnd.apple.mpegurl')) {
       // 某些浏览器原生支持HLS
-      videoElement.value.src = props.hlsUrl
+      videoElement.value.src = sourceUrl
       loading.value = false
       if (props.autoplay) {
         videoElement.value.play()
@@ -182,7 +188,7 @@ const initPlayer = () => {
     }
   } else {
     // 处理普通视频
-    videoElement.value.src = props.hlsUrl
+    videoElement.value.src = sourceUrl
     loading.value = false
     if (props.autoplay) {
       videoElement.value.play()
@@ -347,10 +353,10 @@ const cleanup = () => {
 }
 
 /**
- * 监听hlsUrl变化
+ * 监听videoUrl或hlsUrl变化
  */
 watch(
-  () => props.hlsUrl,
+  () => props.videoUrl || props.hlsUrl,
   (newUrl) => {
     if (newUrl) {
       cleanup()

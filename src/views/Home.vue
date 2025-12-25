@@ -69,6 +69,7 @@
               <div v-if="currentVideo" class="player-wrapper">
                 <VideoPlayer
                   :key="currentVideo.id"
+                  :videoUrl="currentVideo.videoUrl"
                   :hlsUrl="currentVideo.hlsUrl"
                   :videoInfo="currentVideo"
                   :autoplay="true"
@@ -119,8 +120,7 @@
                   @click="selectVideo(video)"
                 >
                   <div class="video-item-cover">
-                    <img :src="video.cover" :alt="video.title" loading="lazy" />
-                    <div class="duration">{{ video.duration }}</div>
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'%3E%3Crect fill='%23f0f0f0' width='400' height='225'/%3E%3Ctext x='200' y='120' text-anchor='middle' fill='%23999' font-size='16'%3E视频封面%3C/text%3E%3C/svg%3E" :alt="video.title" loading="lazy" />
                     <div class="play-overlay" v-if="currentVideo?.id === video.id">
                       <el-icon><VideoPlay /></el-icon>
                     </div>
@@ -128,12 +128,7 @@
                   <div class="video-item-info">
                     <h4>{{ video.title }}</h4>
                     <p class="meta">
-                      <span class="uploader">{{ video.uploadedBy }}</span>
-                      <span class="upload-time">{{ video.uploadTime || '1天前' }}</span>
-                    </p>
-                    <p class="views">
-                      <el-icon style="vertical-align: middle"><VideoPlay /></el-icon>
-                      {{ video.views }} 次观看
+                      <span class="upload-time">{{ formatTime(video.createTime) }}</span>
                     </p>
                   </div>
                 </div>
@@ -170,8 +165,7 @@
           @click="selectVideo(video)"
         >
           <div class="video-card-cover">
-            <img :src="video.cover" :alt="video.title" loading="lazy" />
-            <div class="duration-badge">{{ video.duration }}</div>
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 225'%3E%3Crect fill='%23f0f0f0' width='400' height='225'/%3E%3Ctext x='200' y='120' text-anchor='middle' fill='%23999' font-size='16'%3E视频封面%3C/text%3E%3C/svg%3E" :alt="video.title" loading="lazy" />
             <div class="play-button">
               <el-icon><VideoPlay /></el-icon>
             </div>
@@ -180,10 +174,8 @@
           <div class="video-card-body">
             <h3 class="video-title">{{ video.title }}</h3>
             <div class="video-meta">
-              <span class="uploader">{{ video.uploadedBy }}</span>
-              <span class="view-count">{{ video.views }} 观看</span>
+              <span class="upload-time">{{ formatTime(video.createTime) }}</span>
             </div>
-            <p class="video-desc">{{ video.description }}</p>
           </div>
         </div>
       </div>
@@ -234,21 +226,27 @@ const recommendedVideos = computed(() => {
 const loadVideos = async (page = 1) => {
   loading.value = true
   try {
-    // 这里可以切换为真实API调用
-    // const response = await getVideos({ page, pageSize: pageSize.value })
-    const response = await fetchMockVideos(page, pageSize.value)
+    // 使用真实API调用
+    const response = await getVideos({ page, pageSize: pageSize.value })
+    // 备用mock数据调用
+    // const response = await fetchMockVideos(page, pageSize.value)
 
-    videos.value = response.data
-    totalVideos.value = response.total
-    currentPage.value = page
-    searchResults.value = null // 重置搜索结果
+    // 处理新的API响应格式
+    if (response.code === 200) {
+      videos.value = response.data
+      totalVideos.value = response.data.length
+      currentPage.value = page
+      searchResults.value = null // 重置搜索结果
 
-    // 如果没有选中的视频，自动选中第一个
-    if (!currentVideo.value && videos.value.length > 0) {
-      selectVideo(videos.value[0])
+      // 如果没有选中的视频，自动选中第一个
+      if (!currentVideo.value && videos.value.length > 0) {
+        selectVideo(videos.value[0])
+      }
+
+      videoStore.setVideoList(videos.value)
+    } else {
+      useMessage.error(response.msg || '获取视频列表失败')
     }
-
-    videoStore.setVideoList(videos.value)
   } catch (error) {
     console.error('获取视频列表失败:', error)
     useMessage.error('获取视频列表失败，请重试')
@@ -297,6 +295,19 @@ const selectVideo = (video) => {
   currentVideo.value = video
   videoStore.setCurrentVideo(video)
   useMessage.success(`已选择: ${video.title}`, 1500)
+}
+
+/**
+ * 格式化时间
+ */
+const formatTime = (timeString) => {
+  if (!timeString) return '未知时间'
+  try {
+    const date = new Date(timeString)
+    return date.toLocaleString('zh-CN')
+  } catch {
+    return '未知时间'
+  }
 }
 
 /**
