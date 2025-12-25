@@ -175,3 +175,31 @@ export const deleteMyVideo = (videoId) => {
     }, 300)
   })
 }
+
+/**
+ * 模拟推流接口 - 根据视频ID获取HLS播放地址
+ */
+export const mockGetStreamUrl = (videoId) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const video = mockVideos.find(v => v.id === parseInt(videoId))
+      if (video) {
+        resolve({
+          code: '200',
+          message: '推流成功',
+          videoTitle: video.title,
+          streamName: `video_${videoId}_${video.title.replace(/\s+/g, '_')}`,
+          playUrl: `http://localhost/live/video_${videoId}_stream.m3u8`
+        })
+      } else {
+        resolve({
+          code: '404',
+          message: '视频不存在',
+          videoTitle: '',
+          streamName: '',
+          playUrl: ''
+        })
+      }
+    }, 800) // 模拟推流需要一点时间
+  })
+}

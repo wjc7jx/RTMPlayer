@@ -128,8 +128,8 @@ const currentTime = ref(0)
 const duration = ref(0)
 
 const currentSource = computed(() => {
-  // 优先使用videoUrl（新格式）
-  const sourceUrl = props.videoUrl || props.hlsUrl
+  // 优先使用hlsUrl，支持HLS流
+  const sourceUrl = props.hlsUrl || props.videoUrl
   
   // 如果是HLS地址且浏览器支持，使用HLS.js
   if (sourceUrl && sourceUrl.endsWith('.m3u8')) {
@@ -142,7 +142,7 @@ const currentSource = computed(() => {
  * 初始化播放器
  */
 const initPlayer = () => {
-  const sourceUrl = props.videoUrl || props.hlsUrl
+  const sourceUrl = props.hlsUrl || props.videoUrl
   if (!videoElement.value || !sourceUrl) return
 
   loading.value = true
@@ -353,10 +353,10 @@ const cleanup = () => {
 }
 
 /**
- * 监听videoUrl或hlsUrl变化
+ * 监听hlsUrl或videoUrl变化
  */
 watch(
-  () => props.videoUrl || props.hlsUrl,
+  () => props.hlsUrl || props.videoUrl,
   (newUrl) => {
     if (newUrl) {
       cleanup()

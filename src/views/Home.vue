@@ -67,10 +67,16 @@
 
             <div class="card-body">
               <div v-if="currentVideo" class="player-wrapper">
+                <!-- 流地址加载中 -->
+                <div v-if="streamLoading" class="loading-container">
+                  <el-icon class="is-loading"><Loading /></el-icon>
+                  <p>正在获取播放地址...</p>
+                </div>
+                <!-- 视频播放器 -->
                 <VideoPlayer
-                  :key="currentVideo.id"
-                  :videoUrl="currentVideo.videoUrl"
-                  :hlsUrl="currentVideo.hlsUrl"
+                  v-else-if="currentStreamUrl"
+                  :key="`${currentVideo.id}-${currentStreamUrl}`"
+                  :hlsUrl="currentStreamUrl"
                   :videoInfo="currentVideo"
                   :autoplay="true"
                   @play="onVideoPlay"
@@ -78,6 +84,10 @@
                   @ended="onVideoEnded"
                   @error="onVideoError"
                 />
+                <!-- 无播放地址 -->
+                <div v-else class="no-stream">
+                  <p>无法获取播放地址</p>
+                </div>
               </div>
               <div v-else class="empty-player">
                 <Empty description="请从播放列表中选择视频观看" :showButton="false" />
@@ -186,18 +196,21 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useVideoStore } from '@/stores/video'
-import { getVideos } from '@/api/video'
-import { fetchMockVideos, searchMockVideos } from '@/utils/mockData'
+import { getVideos, getStreamUrl } from '@/api/video'
+import { fetchMockVideos, searchMockVideos, mockGetStreamUrl } from '@/utils/mockData'
+import { useMockData } from '@/utils/env'
 import { useMessage } from '@/utils/message'
 import VideoPlayer from '@/components/VideoPlayer.vue'
 import Empty from '@/components/Empty.vue'
-import { Search, VideoPlay } from '@element-plus/icons-vue'
+import { Search, VideoPlay, Loading } from '@element-plus/icons-vue'
 
 const videoStore = useVideoStore()
 
 // 状态
 const videos = ref([])
 const currentVideo = ref(null)
+const currentStreamUrl = ref('') // 当前视频的流地址
+const streamLoading = ref(false) // 流地址加载状态
 const loading = ref(false)
 const searchKeyword = ref('')
 const currentPage = ref(1)
@@ -226,12 +239,18 @@ const recommendedVideos = computed(() => {
 const loadVideos = async (page = 1) => {
   loading.value = true
   try {
-    // 使用真实API调用
-    const response = await getVideos({ page, pageSize: pageSize.value })
-    // 备用mock数据调用
-    // const response = await fetchMockVideos(page, pageSize.value)
+    let response
+    
+    // 根据环境变量决定使用mock数据还是真实API
+    if (useMockData()) {
+      console.log('🧪 使用Mock数据')
+      response = await fetchMockVideos(page, pageSize.value)
+    } else {
+      console.log('🌐 使用真实API')
+      response = await getVideos({ page, pageSize: pageSize.value })
+    }
 
-    // 处理新的API响应格式
+    // 处理API响应格式
     if (response.code === 200) {
       videos.value = response.data
       totalVideos.value = response.data.length
@@ -268,15 +287,29 @@ const handleSearch = async () => {
 
   loading.value = true
   try {
-    // 这里可以切换为真实API调用
-    // const response = await getVideos({ keyword: searchKeyword.value })
-    const response = await searchMockVideos(searchKeyword.value)
+    let response
+    
+    // 根据环境变量决定使用mock数据还是真实API
+    if (useMockData()) {
+      console.log('🧪 使用Mock搜索数据')
+      response = await searchMockVideos(searchKeyword.value)
+      searchResults.value = response.data
+      totalVideos.value = response.total
+    } else {
+      console.log('🌐 使用真实搜索API')
+      // 假设真实API支持关键词搜索参数
+      response = await getVideos({ keyword: searchKeyword.value })
+      if (response.code === 200) {
+        searchResults.value = response.data
+        totalVideos.value = response.data.length
+      } else {
+        useMessage.error(response.msg || '搜索失败')
+        return
+      }
+    }
 
-    searchResults.value = response.data
-    totalVideos.value = response.total
-
-    if (response.data.length > 0) {
-      selectVideo(response.data[0])
+    if (searchResults.value.length > 0) {
+      selectVideo(searchResults.value[0])
     } else {
       useMessage.info('未找到匹配的视频')
     }
@@ -291,10 +324,38 @@ const handleSearch = async () => {
 /**
  * 选中视频
  */
-const selectVideo = (video) => {
+const selectVideo = async (video) => {
   currentVideo.value = video
   videoStore.setCurrentVideo(video)
-  useMessage.success(`已选择: ${video.title}`, 1500)
+  
+  // 获取流地址
+  streamLoading.value = true
+  currentStreamUrl.value = ''
+  
+  try {
+    let response
+    
+    // 根据环境变量决定使用mock数据还是真实API
+    if (useMockData()) {
+      console.log('🧪 使用Mock推流数据')
+      response = await mockGetStreamUrl(video.id)
+    } else {
+      console.log('🌐 使用真实推流API')
+      response = await getStreamUrl(video.id)
+    }
+    
+    if (response.code === '200') {
+      currentStreamUrl.value = response.playUrl
+      useMessage.success(`已选择: ${video.title}`, 1500)
+    } else {
+      useMessage.error(response.message || '获取播放地址失败')
+    }
+  } catch (error) {
+    console.error('获取流地址失败:', error)
+    useMessage.error('获取播放地址失败，请重试')
+  } finally {
+    streamLoading.value = false
+  }
 }
 
 /**
@@ -790,6 +851,46 @@ watch(searchKeyword, () => {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* 加载状态样式 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: var(--bili-bg-card);
+  border-radius: 12px;
+  color: var(--bili-text-secondary);
+  min-height: 300px;
+}
+
+.loading-container .el-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  color: var(--bili-color-primary);
+}
+
+.loading-container p {
+  margin: 0;
+  font-size: 16px;
+}
+
+.no-stream {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: var(--bili-bg-card);
+  border-radius: 12px;
+  color: var(--bili-text-secondary);
+  min-height: 300px;
+}
+
+.no-stream p {
+  margin: 0;
+  font-size: 16px;
 }
 
 /* 响应式设计 */

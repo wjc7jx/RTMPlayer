@@ -6,6 +6,9 @@ import 'element-plus/dist/index.css'
 import router from './router'
 import { createPinia } from 'pinia'
 
+// 引入环境工具 - 会在开发环境下打印环境信息
+import './utils/env'
+
 const app = createApp(App)
 
 app.use(ElementPlus)

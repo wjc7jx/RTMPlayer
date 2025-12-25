@@ -28,3 +28,8 @@ export const getMyVideos = (params) => {
 export const deleteVideo = (id) => {
   return request.delete(`/my/videos/${id}`)
 }
+
+// 视频推流到 Nginx-RTMP 服务器，获取HLS播放地址
+export const getStreamUrl = (videoId) => {
+  return request.post(`/api/stream/push/${videoId}`)
+}
