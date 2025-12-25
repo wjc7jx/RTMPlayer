@@ -22,6 +22,16 @@ export const isProdMode = () => {
   return getAppMode() === 'prod'
 }
 
+// 判断是否为生产环境测试
+export const isProdTestMode = () => {
+  return getAppMode() === 'prod-test'
+}
+
+// 判断是否为生产环境（包括prod和prod-test）
+export const isProductionLike = () => {
+  return isProdMode() || isProdTestMode()
+}
+
 // 判断是否使用Mock数据
 export const useMockData = () => {
   return isTestMode()

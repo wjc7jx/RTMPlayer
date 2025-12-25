@@ -33,11 +33,22 @@ npm run dev
 npm run prod
 ```
 
+### 生产环境测试 (prod-test)
+- 通过本地代理连接生产服务器
+- 解决跨域问题，便于本地测试生产API
+- 推荐用于生产环境调试
+
+```bash
+npm run prod-test
+```
+
 ## API 配置
 
 ### 环境变量文件
 - `.env.test` - 测试环境配置
 - `.env.development` - 开发环境配置  
+- `.env.production` - 生产环境配置
+- `.env.prod-test` - 生产环境测试配置
 - `.env.production` - 生产环境配置
 
 ### API 接口

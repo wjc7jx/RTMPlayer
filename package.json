@@ -7,6 +7,7 @@
     "dev": "vite --mode development",
     "test": "vite --mode test",
     "prod": "vite --mode production",
+    "prod-test": "vite --mode prod-test",
     "build": "vite build",
     "preview": "vite preview"
   },
